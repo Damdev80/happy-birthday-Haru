@@ -1,0 +1,119 @@
+---
+/* Sistema de mensajes — activado por rally */
+---
+
+<div class="msg-layer" id="msg-layer">
+	<p class="msg" id="message-display"></p>
+	<p class="msg-counter" id="msg-counter"></p>
+</div>
+
+<style>
+	.msg-layer {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 30;
+		padding: 1rem 1.5rem 2rem;
+		text-align: center;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.7s ease;
+		background: linear-gradient(to top, var(--bg) 45%, transparent 100%);
+	}
+
+	.msg {
+		font-size: 1.15rem;
+		line-height: 1.8;
+		color: var(--text-soft);
+		white-space: pre-line;
+		min-height: 1.5em;
+		opacity: 0;
+		transform: translateY(6px);
+		transition: opacity 0.6s ease, transform 0.6s ease;
+		max-width: 340px;
+		margin: 0 auto;
+	}
+
+	.msg--visible {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.msg--final {
+		color: var(--text-bright);
+		font-size: 1.2rem;
+	}
+
+	.msg-counter {
+		font-size: 0.7rem;
+		color: var(--text-muted);
+		letter-spacing: 0.15em;
+		margin-top: 0.5rem;
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	.msg-counter--visible {
+		opacity: 1;
+	}
+</style>
+
+<script>
+	// ── Edita tus mensajes aquí ──────────────────────────
+	const messages: string[] = [
+		'Te deseo lo Mejor en este día',
+		'Eres una persona increíble y mereces toda la felicidad del mundo',
+		'Espero que este nuevo año de vida te traiga muchas alegrías y éxitos',
+		'Que Dios te cumpla todo los deseos de tu corazón',
+		'Gracias por ser tu... por ser tú, simplemente',
+	];
+
+	const finalMessage = 'Y bueno se que llevo poco tiempo conociéndote pero me alegra mucho haberte conocido y espero que podamos compartir muchos momentos más juntos y siempre que pueda hacer tu vida un poco mas feliz lo haré. Te quedo deviendo el regalo pero espero que este detallito te guste, feliz cumpleaños Vale!  ajaja🎉';
+	// ─────────────────────────────────────────────────────
+
+	const layer = document.getElementById('msg-layer')!;
+	const el = document.getElementById('message-display')!;
+	const counterEl = document.getElementById('msg-counter')!;
+	let index = -1;
+	let transitioning = false;
+
+	function show(text: string, isFinal = false) {
+		if (transitioning) return;
+		transitioning = true;
+
+		el.classList.remove('msg--visible');
+		counterEl.classList.remove('msg-counter--visible');
+
+		setTimeout(() => {
+			el.textContent = text;
+			el.classList.toggle('msg--final', isFinal);
+
+			if (isFinal) {
+				counterEl.textContent = '';
+				document.dispatchEvent(new CustomEvent('messages:done'));
+			} else {
+				counterEl.textContent = `${index + 1} / ${messages.length}`;
+			}
+
+			requestAnimationFrame(() => {
+				el.classList.add('msg--visible');
+				if (!isFinal) counterEl.classList.add('msg-counter--visible');
+				transitioning = false;
+			});
+		}, 400);
+	}
+
+	document.addEventListener('ball:interact', () => {
+		index++;
+		if (index < messages.length) {
+			show(messages[index]);
+		} else if (index === messages.length) {
+			show(finalMessage, true);
+		}
+	});
+
+	document.addEventListener('welcome:done', () => {
+		layer.style.opacity = '1';
+	});
+</script>

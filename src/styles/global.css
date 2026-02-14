@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/* ── Base ─────────────────────────────────────────── */
+:root {
+  --bg: #0a0a0b;
+  --text: #c8c0b4;
+  --text-soft: #8a857a;
+  --text-muted: #5a5650;
+  --text-bright: #e8e0d4;
+  --border-subtle: rgba(200, 192, 180, 0.15);
+  --serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: var(--bg);
+  background-image: radial-gradient(ellipse at 25% 12%, rgba(35, 30, 25, 0.3) 0%, transparent 55%);
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ── Shared keyframes ────────────────────────────── */
+@keyframes appear {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes welcomeFade {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}

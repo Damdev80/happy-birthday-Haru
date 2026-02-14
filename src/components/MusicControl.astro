@@ -1,0 +1,82 @@
+---
+/* Botón discreto para reproducir música */
+---
+
+<aside class="music-aside" id="music-aside" aria-label="Control de música">
+	<button class="music-btn" id="music-btn" type="button" aria-label="Reproducir música">
+		<span aria-hidden="true">♪</span>
+	</button>
+
+	<audio id="audio-player" loop preload="none">
+		<source src="/music.mp3" type="audio/mpeg" />
+	</audio>
+</aside>
+
+<style>
+	.music-aside {
+		position: fixed;
+		top: 1.2rem;
+		right: 1.2rem;
+		z-index: 40;
+		opacity: 0;
+		transition: opacity 0.8s ease;
+	}
+
+	.music-btn {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		border: 1px solid var(--border-subtle);
+		background: rgba(255, 255, 255, 0.02);
+		color: var(--text-muted);
+		font-size: 1rem;
+		cursor: pointer;
+		display: grid;
+		place-items: center;
+		transition: color 0.3s, border-color 0.3s;
+	}
+
+	.music-btn:hover,
+	.music-btn:focus-visible {
+		border-color: rgba(140, 134, 124, 0.35);
+		color: var(--text-soft);
+		outline: none;
+	}
+
+	.music-btn--playing {
+		color: var(--text);
+		animation: breathe 3s ease-in-out infinite;
+	}
+</style>
+
+<script>
+	const aside = document.getElementById('music-aside')!;
+	const btn = document.getElementById('music-btn')!;
+	const audio = document.getElementById('audio-player') as HTMLAudioElement;
+	let playing = false;
+
+	btn.addEventListener('click', async () => {
+		if (playing) {
+			audio.pause();
+			btn.classList.remove('music-btn--playing');
+			btn.setAttribute('aria-label', 'Reproducir música');
+		} else {
+			try {
+				await audio.play();
+				btn.classList.add('music-btn--playing');
+				btn.setAttribute('aria-label', 'Pausar música');
+			} catch { /* sin audio */ }
+		}
+		playing = !playing;
+	});
+
+	document.addEventListener('welcome:done', () => {
+		aside.style.opacity = '1';
+		/* Auto-play music when entering */
+		audio.play().then(() => {
+			playing = true;
+			btn.classList.add('music-btn--playing');
+			btn.setAttribute('aria-label', 'Pausar música');
+		}).catch(() => { /* browser blocked autoplay */ });
+	});
+</script>

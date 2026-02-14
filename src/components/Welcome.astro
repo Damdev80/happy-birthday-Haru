@@ -1,0 +1,127 @@
+---
+/* Pantalla de bienvenida con confetti */
+---
+
+<div class="welcome" id="welcome-screen">
+	<div class="welcome__inner">
+		<div class="welcome__photo">
+			<!-- Pon la foto en public/foto-haru.webp -->
+			<img src="/public/foto-haru.webp" alt="Valeria" class="welcome__img" />
+		</div>
+		<p class="welcome__greeting">Feliz cumpleaños</p>
+		<h1 class="welcome__name">Haru</h1>
+		<button class="welcome__btn" id="welcome-btn" type="button">entrar</button>
+	</div>
+</div>
+
+<style>
+	.welcome {
+		position: fixed;
+		inset: 0;
+		z-index: 100;
+		background: var(--bg);
+		display: grid;
+		place-items: center;
+		transition: opacity 0.8s ease;
+	}
+
+	.welcome__inner {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.6rem;
+		animation: welcomeFade 1.2s ease both;
+	}
+
+	.welcome__photo {
+		width: 200px;
+		height: 260px;
+		border-radius: 16px;
+		overflow: hidden;
+		border: 2px solid var(--border-subtle);
+		margin-bottom: 1.2rem;
+		box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+	}
+
+	.welcome__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.welcome__greeting {
+		font-size: 1.1rem;
+		letter-spacing: 0.3em;
+		color: var(--text-soft);
+		margin-bottom: 0.3rem;
+	}
+
+	.welcome__name {
+		font-family: var(--serif);
+		font-size: 4.5rem;
+		font-weight: 400;
+		letter-spacing: 0.04em;
+		color: var(--text-bright);
+		line-height: 1;
+	}
+
+	.welcome__emoji {
+		font-size: 2.5rem;
+		margin: 1rem 0 2.5rem;
+		opacity: 0.75;
+	}
+
+	.welcome__btn {
+		background: none;
+		border: 1px solid var(--border-subtle);
+		color: var(--text-soft);
+		font-family: var(--serif);
+		font-size: 1rem;
+		letter-spacing: 0.2em;
+		padding: 0.8rem 2.8rem;
+		border-radius: 30px;
+		cursor: pointer;
+		transition: color 0.3s, border-color 0.3s;
+		animation: welcomeFade 1s ease 0.6s both;
+	}
+
+	.welcome__btn:hover,
+	.welcome__btn:focus-visible {
+		color: var(--text);
+		border-color: rgba(200, 192, 180, 0.4);
+		outline: none;
+	}
+
+	@media (min-width: 640px) {
+		.welcome__name { font-size: 6rem; }
+		.welcome__greeting { font-size: 1.3rem; }
+	}
+</style>
+
+<script >
+	import confetti from 'canvas-confetti';
+
+	const screen = document.getElementById('welcome-screen')!;
+	const btn = document.getElementById('welcome-btn')!;
+
+	function launchConfetti() {
+		const colors = ['#c8c0b4', '#e8e0d4', '#a09a90', '#d4c8b8', '#f0ebe4'];
+		const defaults = { disableForReducedMotion: true, colors };
+
+		confetti({ ...defaults, particleCount: 90, spread: 70, origin: { y: 0.6, x: 0.5 }, gravity: 0.8, ticks: 220 });
+		setTimeout(() => confetti({ ...defaults, particleCount: 55, spread: 100, origin: { y: 0.5, x: 0.3 }, gravity: 0.7, ticks: 200 }), 350);
+		setTimeout(() => confetti({ ...defaults, particleCount: 45, spread: 85, origin: { y: 0.55, x: 0.7 }, gravity: 0.75, ticks: 180 }), 650);
+	}
+
+	setTimeout(launchConfetti, 500);
+
+	btn.addEventListener('click', () => {
+		screen.style.opacity = '0';
+		screen.style.pointerEvents = 'none';
+		setTimeout(() => {
+			screen.remove();
+			document.dispatchEvent(new CustomEvent('welcome:done'));
+		}, 850);
+	});
+</script>

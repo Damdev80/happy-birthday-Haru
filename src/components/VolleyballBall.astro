@@ -1,0 +1,461 @@
+---
+/* Cancha de voleibol — rally de izquierda a derecha */
+---
+
+<section class="court-wrap" id="court-wrap">
+	<div class="court" id="court">
+		<!-- Red (vertical, centro) -->
+		<div class="net" id="net"></div>
+		<div class="net-cap"></div>
+
+		<!-- Pelota -->
+		<div class="ball" id="ball" role="button" tabindex="0" aria-label="Golpea la pelota">
+			<svg class="ball__seams" viewBox="0 0 100 100" aria-hidden="true">
+				<ellipse cx="50" cy="50" rx="46" ry="17"/>
+				<ellipse cx="50" cy="50" rx="46" ry="17" transform="rotate(60 50 50)"/>
+				<ellipse cx="50" cy="50" rx="46" ry="17" transform="rotate(120 50 50)"/>
+			</svg>
+		</div>
+
+		<!-- Sombra -->
+		<div class="ball-shadow" id="ball-shadow"></div>
+
+		<!-- Flash de punto -->
+		<div class="flash flash--l" id="flash-l"></div>
+		<div class="flash flash--r" id="flash-r"></div>
+	</div>
+
+	<p class="court-hint" id="court-hint">golpea la pelota al otro lado →</p>
+</section>
+
+<style>
+	.court-wrap {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.8rem;
+		opacity: 0;
+		transition: opacity 0.7s ease;
+	}
+
+	.court {
+		position: relative;
+		width: calc(100vw - 1.5rem);
+		max-width: 440px;
+		height: calc(100dvh - 14rem);
+		min-height: 260px;
+		max-height: 460px;
+		border: 1px solid rgba(200, 192, 180, 0.1);
+		border-radius: 12px;
+		background:
+			radial-gradient(ellipse at 50% 95%, rgba(30, 27, 22, 0.5) 0%, transparent 60%),
+			linear-gradient(180deg, rgba(16, 16, 18, 0.4) 0%, rgba(10, 10, 12, 0.85) 100%);
+		overflow: hidden;
+		touch-action: none;
+	}
+
+	/* ── Red vertical (centro) ───────────── */
+	.net {
+		position: absolute;
+		left: calc(50% - 1px);
+		width: 2px;
+		top: 40%;
+		bottom: 0;
+		background: repeating-linear-gradient(
+			180deg,
+			rgba(200, 192, 180, 0.22) 0px,
+			rgba(200, 192, 180, 0.22) 4px,
+			transparent 4px,
+			transparent 8px
+		);
+		z-index: 3;
+	}
+
+	.net-cap {
+		position: absolute;
+		left: calc(50% - 10px);
+		width: 20px;
+		top: calc(40% - 2px);
+		height: 4px;
+		background: rgba(200, 192, 180, 0.22);
+		border-radius: 2px;
+		z-index: 3;
+	}
+
+	/* ── Pelota ──────────────────────────── */
+	.ball {
+		width: 58px;
+		height: 58px;
+		border-radius: 50%;
+		background: radial-gradient(circle at 36% 32%, #f5f0e8, #ddd6ca 45%, #c4bcb0 85%, #b0a898);
+		position: absolute;
+		top: 0;
+		left: 0;
+		overflow: hidden;
+		cursor: grab;
+		outline: none;
+		touch-action: none;
+		box-shadow:
+			0 5px 20px rgba(0, 0, 0, 0.5),
+			0 2px 8px rgba(0, 0, 0, 0.3),
+			inset 0 -3px 8px rgba(0, 0, 0, 0.12),
+			inset 0 2px 5px rgba(255, 255, 255, 0.1);
+		will-change: transform;
+		z-index: 5;
+	}
+
+	.ball:active { cursor: grabbing; }
+
+	.ball__seams {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+
+	.ball__seams ellipse {
+		fill: none;
+		stroke: rgba(0, 0, 0, 0.09);
+		stroke-width: 0.9;
+	}
+
+	/* ── Sombra ──────────────────────────── */
+	.ball-shadow {
+		position: absolute;
+		bottom: 5px;
+		width: 48px;
+		height: 8px;
+		background: radial-gradient(ellipse, rgba(0, 0, 0, 0.28) 0%, transparent 70%);
+		border-radius: 50%;
+		pointer-events: none;
+		z-index: 1;
+	}
+
+	/* ── Flash de punto ─────────────────── */
+	.flash {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 50%;
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		pointer-events: none;
+		z-index: 2;
+	}
+	.flash--l {
+		left: 0;
+		background: radial-gradient(ellipse at 30% 60%, rgba(200, 192, 180, 0.07), transparent 65%);
+	}
+	.flash--r {
+		right: 0;
+		background: radial-gradient(ellipse at 70% 60%, rgba(200, 192, 180, 0.07), transparent 65%);
+	}
+	.flash--active {
+		opacity: 1;
+	}
+
+	/* ── Hint ────────────────────────────── */
+	.court-hint {
+		font-size: 0.82rem;
+		letter-spacing: 0.1em;
+		color: var(--text-muted);
+		text-align: center;
+		transition: opacity 0.5s ease;
+		min-height: 1.2em;
+	}
+</style>
+
+<script>
+	const ball = document.getElementById('ball')!;
+	const court = document.getElementById('court')!;
+	const courtWrap = document.getElementById('court-wrap')!;
+	const shadow = document.getElementById('ball-shadow')!;
+	const hint = document.getElementById('court-hint')!;
+	const flashL = document.getElementById('flash-l')!;
+	const flashR = document.getElementById('flash-r')!;
+
+	const BALL_SIZE = 58;
+	const GRAVITY = 0.38;
+	const BOUNCE = 0.5;
+	const FRICTION = 0.99;
+	const NET_TOP_RATIO = 0.40;
+
+	/* court bounds */
+	let cW = court.clientWidth;
+	let cH = court.clientHeight;
+	let floorY = cH - BALL_SIZE - 4;
+	let maxX = cW - BALL_SIZE;
+	let netCX = cW / 2;
+	let netTopY = cH * NET_TOP_RATIO;
+
+	/* rally state */
+	let targetSide: 'left' | 'right' = 'right';
+	let justScored = false;
+	let allDone = false;
+	let ballSide: 'left' | 'right' = 'left';
+
+	/* ball state */
+	let x = cW * 0.15;
+	let y = floorY;
+	let vx = 0;
+	let vy = 0;
+	let rotation = 0;
+	let rotationSpeed = 0;
+	let animFrame = 0;
+	let isDragging = false;
+	let hasMoved = false;
+
+	/* drag helpers */
+	let courtRect = court.getBoundingClientRect();
+	let dragOffsetX = 0;
+	let dragOffsetY = 0;
+	let lastPX = 0;
+	let lastPY = 0;
+	let lastPTime = 0;
+	let throwVX = 0;
+	let throwVY = 0;
+
+	/* ── recalc on resize ────────────────── */
+	function recalc() {
+		cW = court.clientWidth;
+		cH = court.clientHeight;
+		floorY = cH - BALL_SIZE - 4;
+		maxX = cW - BALL_SIZE;
+		netCX = cW / 2;
+		netTopY = cH * NET_TOP_RATIO;
+		x = Math.min(x, maxX);
+		y = Math.min(y, floorY);
+		render();
+	}
+	window.addEventListener('resize', recalc);
+
+	/* ── render ──────────────────────────── */
+	function render() {
+		ball.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+		const heightRatio = Math.max(0, 1 - (floorY - y) / floorY);
+		const sScale = 0.35 + heightRatio * 0.65;
+		const sOpacity = 0.08 + heightRatio * 0.22;
+		shadow.style.left = `${x + BALL_SIZE / 2 - 24}px`;
+		shadow.style.opacity = String(sOpacity);
+		shadow.style.transform = `scaleX(${sScale})`;
+	}
+
+	/* ── hint / score helpers ────────────── */
+	function updateHint() {
+		if (allDone) {
+			hint.textContent = '✦';
+			return;
+		}
+		hint.textContent = targetSide === 'right'
+			? 'golpea la pelota al otro lado →'
+			: '← golpea la pelota al otro lado';
+	}
+
+	function flashSide(side: 'left' | 'right') {
+		const el = side === 'left' ? flashL : flashR;
+		el.classList.add('flash--active');
+		setTimeout(() => el.classList.remove('flash--active'), 700);
+	}
+
+	function score() {
+		flashSide(targetSide);
+		document.dispatchEvent(new CustomEvent('ball:interact'));
+		targetSide = targetSide === 'right' ? 'left' : 'right';
+		updateHint();
+	}
+
+	/* ── pointer helpers ─────────────────── */
+	function getPointer(e: MouseEvent | TouchEvent) {
+		if ('touches' in e && e.touches.length) {
+			return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+		}
+		return { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
+	}
+
+	function onStart(e: MouseEvent | TouchEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		isDragging = true;
+		hasMoved = false;
+		justScored = false;
+		cancelAnimationFrame(animFrame);
+
+		courtRect = court.getBoundingClientRect();
+		const p = getPointer(e);
+		dragOffsetX = p.x - courtRect.left - x;
+		dragOffsetY = p.y - courtRect.top - y;
+		lastPX = p.x;
+		lastPY = p.y;
+		lastPTime = performance.now();
+		throwVX = 0;
+		throwVY = 0;
+
+		document.addEventListener('mousemove', onMove, { passive: false });
+		document.addEventListener('mouseup', onEnd);
+		document.addEventListener('touchmove', onMove, { passive: false });
+		document.addEventListener('touchend', onEnd);
+	}
+
+	function onMove(e: MouseEvent | TouchEvent) {
+		if (!isDragging) return;
+		e.preventDefault();
+
+		const p = getPointer(e);
+		const now = performance.now();
+		const dt = Math.max(1, now - lastPTime);
+
+		if (!hasMoved && (Math.abs(p.x - lastPX) > 2 || Math.abs(p.y - lastPY) > 2)) {
+			hasMoved = true;
+		}
+
+		throwVX = (p.x - lastPX) / dt * 16;
+		throwVY = (p.y - lastPY) / dt * 16;
+		lastPX = p.x;
+		lastPY = p.y;
+		lastPTime = now;
+
+		x = p.x - courtRect.left - dragOffsetX;
+		y = p.y - courtRect.top - dragOffsetY;
+
+		/* clamp to court — but also respect net while dragging */
+		x = Math.max(0, Math.min(maxX, x));
+		y = Math.max(0, Math.min(floorY, y));
+
+		render();
+	}
+
+	function onEnd() {
+		if (!isDragging) return;
+		isDragging = false;
+
+		document.removeEventListener('mousemove', onMove);
+		document.removeEventListener('mouseup', onEnd);
+		document.removeEventListener('touchmove', onMove);
+		document.removeEventListener('touchend', onEnd);
+
+		if (!hasMoved) {
+			/* tap → lanzar hacia el lado objetivo */
+			const dir = targetSide === 'right' ? 1 : -1;
+			vx = dir * (4 + Math.random() * 3);
+			vy = -9 - Math.random() * 3;
+		} else {
+			vx = Math.max(-14, Math.min(14, throwVX));
+			vy = Math.max(-16, Math.min(14, throwVY));
+		}
+
+		rotationSpeed = vx * 2;
+		simulate();
+	}
+
+	/* ── physics loop ────────────────────── */
+	function simulate() {
+		const prevCX = x + BALL_SIZE / 2;
+
+		vy += GRAVITY;
+		vx *= FRICTION;
+		x += vx;
+		y += vy;
+		rotation += rotationSpeed;
+		rotationSpeed *= 0.98;
+
+		/* ── detectar en qué lado está la pelota ── */
+		const curCX = x + BALL_SIZE / 2;
+		const ballCenterY = y + BALL_SIZE / 2;
+		const newSide: 'left' | 'right' = curCX < netCX ? 'left' : 'right';
+
+		/* ── colisión con la red (debajo del borde superior) ── */
+		if (ballCenterY > netTopY) {
+			const wasLeft = prevCX < netCX;
+			const nowLeft = curCX < netCX;
+
+			if (wasLeft !== nowLeft) {
+				/* chocó con la red por abajo → rebota */
+				if (wasLeft) {
+					x = netCX - BALL_SIZE / 2 - 2;
+				} else {
+					x = netCX - BALL_SIZE / 2 + 2;
+				}
+				vx = -vx * 0.3;
+				rotationSpeed *= -0.5;
+			}
+		} else {
+			/* pasó POR ENCIMA de la red → detectar cruce */
+			if (newSide !== ballSide && !justScored && !allDone) {
+				if (newSide === targetSide) {
+					justScored = true;
+					score();
+				}
+			}
+		}
+
+		ballSide = newSide;
+
+		/* ── piso ────────────────────────── */
+		if (y >= floorY) {
+			y = floorY;
+			justScored = false;
+
+			if (Math.abs(vy) > 1) {
+				vy = -vy * BOUNCE;
+				rotationSpeed = vx * 1.2;
+			} else {
+				vy = 0;
+			}
+		}
+
+		/* ── paredes ─────────────────────── */
+		if (x <= 0) { x = 0; vx = Math.abs(vx) * BOUNCE; }
+		if (x >= maxX) { x = maxX; vx = -Math.abs(vx) * BOUNCE; }
+
+		/* ── techo ───────────────────────── */
+		if (y < 0) { y = 0; vy = Math.abs(vy) * 0.4; }
+
+		render();
+
+		const isResting = y >= floorY - 1 && Math.abs(vy) < 0.5 && Math.abs(vx) < 0.3;
+		if (!isResting) {
+			animFrame = requestAnimationFrame(simulate);
+		} else {
+			y = floorY;
+			vx = 0;
+			vy = 0;
+			rotationSpeed = 0;
+			render();
+		}
+	}
+
+	/* ── listen for messages:done ─────────── */
+	document.addEventListener('messages:done', () => {
+		allDone = true;
+		updateHint();
+	});
+
+	/* ── init ────────────────────────────── */
+	recalc();
+	x = cW * 0.15;
+	y = floorY;
+	ballSide = 'left';
+	render();
+
+	ball.addEventListener('mousedown', onStart);
+	ball.addEventListener('touchstart', onStart, { passive: false });
+
+	ball.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			cancelAnimationFrame(animFrame);
+			justScored = false;
+			const dir = targetSide === 'right' ? 1 : -1;
+			vx = dir * 6;
+			vy = -11;
+			rotationSpeed = vx * 2;
+			simulate();
+		}
+	});
+
+	document.addEventListener('welcome:done', () => {
+		courtWrap.style.opacity = '1';
+	});
+</script>
