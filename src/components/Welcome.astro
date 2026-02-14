@@ -5,8 +5,7 @@
 <div class="welcome" id="welcome-screen">
 	<div class="welcome__inner">
 		<div class="welcome__photo">
-			<!-- Pon la foto en public/foto-haru.webp -->
-			<img src="/public/foto-haru.webp" alt="Valeria" class="welcome__img" />
+			<img src="/foto-haru.webp" alt="Haru" class="welcome__img" />
 		</div>
 		<p class="welcome__greeting">Feliz cumpleaños</p>
 		<h1 class="welcome__name">Haru</h1>
@@ -31,6 +30,7 @@
 		align-items: center;
 		gap: 0.6rem;
 		animation: welcomeFade 1.2s ease both;
+		padding: 1.5rem;
 	}
 
 	.welcome__photo {
@@ -39,8 +39,8 @@
 		border-radius: 16px;
 		overflow: hidden;
 		border: 2px solid var(--border-subtle);
-		margin-bottom: 1.2rem;
-		box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+		margin-bottom: 1rem;
+		box-shadow: 0 10px 50px rgba(0, 0, 0, 0.55);
 	}
 
 	.welcome__img {
@@ -51,10 +51,10 @@
 	}
 
 	.welcome__greeting {
-		font-size: 1.1rem;
+		font-size: 1rem;
 		letter-spacing: 0.3em;
 		color: var(--text-soft);
-		margin-bottom: 0.3rem;
+		margin-bottom: 0.1rem;
 	}
 
 	.welcome__name {

@@ -3,6 +3,9 @@
 ---
 
 <div class="msg-layer" id="msg-layer">
+	<div class="msg-photo" id="msg-photo">
+		<img src="/haru2.webp" alt="Haru" class="msg-photo__img" />
+	</div>
 	<p class="msg" id="message-display"></p>
 	<p class="msg-counter" id="msg-counter"></p>
 </div>
@@ -57,6 +60,33 @@
 	.msg-counter--visible {
 		opacity: 1;
 	}
+
+	.msg-photo {
+		width: 180px;
+		height: 230px;
+		border-radius: 14px;
+		overflow: hidden;
+		border: 2px solid var(--border-subtle);
+		margin: 0 auto 1rem;
+		box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+		opacity: 0;
+		transform: scale(0.9) translateY(10px);
+		transition: opacity 0.8s ease, transform 0.8s ease;
+		display: none;
+	}
+
+	.msg-photo--visible {
+		display: block;
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+
+	.msg-photo__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
 </style>
 
 <script>
@@ -75,6 +105,7 @@
 	const layer = document.getElementById('msg-layer')!;
 	const el = document.getElementById('message-display')!;
 	const counterEl = document.getElementById('msg-counter')!;
+	const photoEl = document.getElementById('msg-photo')!;
 	let index = -1;
 	let transitioning = false;
 
@@ -91,6 +122,10 @@
 
 			if (isFinal) {
 				counterEl.textContent = '';
+				photoEl.style.display = 'block';
+				requestAnimationFrame(() => {
+					photoEl.classList.add('msg-photo--visible');
+				});
 				document.dispatchEvent(new CustomEvent('messages:done'));
 			} else {
 				counterEl.textContent = `${index + 1} / ${messages.length}`;
