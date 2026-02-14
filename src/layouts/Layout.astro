@@ -15,6 +15,22 @@ const { title = 'Haru' } = Astro.props;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+
+		<!-- Open Graph / Link preview -->
+		<meta property="og:title" content="Feliz Cumpleaños Haru " />
+		<meta property="og:description" content="Alguien preparó algo especial para ti ✦ Ábrelo y descúbrelo" />
+		<meta property="og:image" content="/foto-haru.webp" />
+		<meta property="og:type" content="website" />
+
+		<!-- Twitter Card -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="Feliz Cumpleaños Haru " />
+		<meta name="twitter:description" content="Alguien preparó algo especial para ti ✦ Ábrelo y descúbrelo" />
+		<meta name="twitter:image" content="/foto-haru.webp" />
+
+		<!-- General -->
+		<meta name="description" content="Una sorpresa de cumpleaños hecha con cariño ✦" />
+		<meta name="theme-color" content="#0a0a0b" />
 	</head>
 	<body>
 		<slot />
