@@ -3,6 +3,7 @@
 ---
 
 <section class="court-wrap" id="court-wrap">
+	<p class="court-label" id="court-label">🏐 cancha de voleibol</p>
 	<div class="court" id="court">
 		<!-- Red (vertical, centro) -->
 		<div class="net" id="net"></div>
@@ -37,6 +38,15 @@
 		gap: 0.8rem;
 		opacity: 0;
 		transition: opacity 0.7s ease;
+	}
+
+	.court-label {
+		font-size: 0.65rem;
+		letter-spacing: 0.35em;
+		color: var(--text-muted);
+		text-transform: uppercase;
+		opacity: 0;
+		animation: appear 1s ease 0.8s both;
 	}
 
 	.court {
