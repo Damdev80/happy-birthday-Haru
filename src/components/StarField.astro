@@ -8,7 +8,7 @@
 	.star-canvas {
 		position: fixed;
 		inset: 0;
-		z-index: 1;
+		z-index: 101;
 		pointer-events: none;
 		opacity: 0;
 		transition: opacity 1.5s ease;
@@ -26,6 +26,8 @@
 	let comets: Comet[] = [];
 	let active = false;
 	let lastCometTime = 0;
+	let goldenMode = false;
+	let goldenTransition = 0; // 0 to 1
 
 	interface Star {
 		x: number; y: number; r: number;
@@ -89,9 +91,16 @@
 		ctx.rotate(rotation);
 		ctx.globalAlpha = alpha;
 
+		const glowColor = goldenMode
+			? `rgba(200, 170, 100, ${0.6 + goldenTransition * 0.3})`
+			: 'rgba(220, 230, 245, 0.6)';
+		const fillColor = goldenMode
+			? `rgba(220, 190, 120, ${alpha})`
+			: `rgba(220, 225, 240, ${alpha})`;
+
 		// Glow
-		ctx.shadowColor = 'rgba(220, 230, 245, 0.6)';
-		ctx.shadowBlur = r * 4;
+		ctx.shadowColor = glowColor;
+		ctx.shadowBlur = r * (goldenMode ? 6 : 4);
 
 		// Star shape
 		ctx.beginPath();
@@ -101,14 +110,14 @@
 			ctx[method](Math.cos(angle) * r, Math.sin(angle) * r);
 		}
 		ctx.closePath();
-		ctx.fillStyle = `rgba(220, 225, 240, ${alpha})`;
+		ctx.fillStyle = fillColor;
 		ctx.fill();
 
 		// Center dot for extra brightness
 		ctx.shadowBlur = 0;
 		ctx.beginPath();
 		ctx.arc(0, 0, r * 0.3, 0, Math.PI * 2);
-		ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
+		ctx.fillStyle = `rgba(255, ${goldenMode ? '240, 200' : '255, 255'}, ${alpha * 0.8})`;
 		ctx.fill();
 
 		ctx.restore();
@@ -220,6 +229,16 @@
 
 		ctx.clearRect(0, 0, W, H);
 
+		// Smooth golden transition
+		if (goldenMode && goldenTransition < 1) {
+			goldenTransition = Math.min(goldenTransition + 0.008, 1);
+			// Make stars brighter and bigger during golden mode
+			for (const s of stars) {
+				s.baseAlpha = Math.min(s.baseAlpha + 0.002, 0.8);
+				s.r = Math.min(s.r + 0.003, 3);
+			}
+		}
+
 		// Background stars
 		for (const s of stars) {
 			s.phase += s.speed * 0.05;
@@ -299,6 +318,17 @@
 	});
 
 	document.addEventListener('welcome:done', () => {
-		start();
+		// stars already running, just ensure visible
+	});
+
+	// Start immediately so comets show during welcome
+	start();
+
+	document.addEventListener('finale:start', () => {
+		goldenMode = true;
+		canvas.style.zIndex = '201';
+		// Change comet colors to golden
+		cometColors.length = 0;
+		cometColors.push('200, 170, 100', '220, 190, 120', '180, 150, 80', '240, 210, 140');
 	});
 </script>

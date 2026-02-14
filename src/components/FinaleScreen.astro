@@ -1,0 +1,339 @@
+---
+/* Pantalla de cierre cinematográfica — se muestra al final de todos los mensajes */
+---
+
+<div class="finale" id="finale-screen">
+	<div class="finale__bg" id="finale-bg"></div>
+
+	<div class="finale__content" id="finale-content">
+		<div class="finale__photo-wrap">
+			<div class="finale__glow"></div>
+			<div class="finale__photo">
+				<img src="/haru2.webp" alt="Haru" class="finale__img" />
+			</div>
+		</div>
+
+		<div class="finale__text">
+			<p class="finale__label">para ti</p>
+			<div class="finale__divider"></div>
+			<p class="finale__message" id="finale-message"></p>
+			<div class="finale__divider finale__divider--bottom"></div>
+		</div>
+
+		<div class="finale__signature">
+			<p class="finale__sig-text">con cariño</p>
+			<p class="finale__sig-name">Daniel</p>
+		</div>
+
+		<button class="finale__replay" id="finale-replay" type="button">
+			vivir de nuevo ↻
+		</button>
+	</div>
+</div>
+
+<style>
+	.finale {
+		position: fixed;
+		inset: 0;
+		z-index: 200;
+		display: grid;
+		place-items: center;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 1.2s ease;
+		overflow-y: auto;
+	}
+
+	.finale--active {
+		opacity: 1;
+		pointer-events: all;
+	}
+
+	.finale__bg {
+		position: absolute;
+		inset: 0;
+		background: #0a0a0b;
+		z-index: 0;
+		transition: background 3s ease;
+	}
+
+	.finale--active .finale__bg {
+		background:
+			radial-gradient(ellipse at 50% 30%, rgba(60, 45, 25, 0.25) 0%, transparent 60%),
+			radial-gradient(ellipse at 30% 70%, rgba(50, 35, 30, 0.15) 0%, transparent 50%),
+			radial-gradient(ellipse at 70% 60%, rgba(45, 30, 45, 0.12) 0%, transparent 50%),
+			#0a0a0b;
+	}
+
+	.finale__content {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.5rem;
+		padding: 2rem 1.5rem 3rem;
+		max-width: 400px;
+		width: 100%;
+	}
+
+	/* ── Photo with glow ── */
+	.finale__photo-wrap {
+		position: relative;
+		opacity: 0;
+		transform: scale(0.8) translateY(20px);
+		animation: finalePhotoReveal 1.5s ease 0.5s both;
+	}
+
+	.finale__glow {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 300px;
+		height: 300px;
+		transform: translate(-50%, -50%);
+		border-radius: 50%;
+		background: radial-gradient(circle, rgba(200, 170, 120, 0.15) 0%, rgba(200, 170, 120, 0.05) 40%, transparent 70%);
+		animation: finaleGlowPulse 4s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	.finale__photo {
+		width: 220px;
+		height: 280px;
+		border-radius: 18px;
+		overflow: hidden;
+		border: 2px solid rgba(200, 180, 140, 0.25);
+		box-shadow:
+			0 15px 60px rgba(0, 0, 0, 0.6),
+			0 0 40px rgba(200, 170, 120, 0.08),
+			inset 0 0 30px rgba(200, 170, 120, 0.03);
+		position: relative;
+	}
+
+	.finale__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	/* ── Text ── */
+	.finale__text {
+		text-align: center;
+		opacity: 0;
+		transform: translateY(15px);
+		animation: finaleTextReveal 1.2s ease 1.5s both;
+	}
+
+	.finale__label {
+		font-size: 0.7rem;
+		letter-spacing: 0.5em;
+		color: rgba(200, 180, 140, 0.6);
+		margin-bottom: 0.8rem;
+		text-transform: uppercase;
+	}
+
+	.finale__divider {
+		width: 30px;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, rgba(200, 180, 140, 0.3), transparent);
+		margin: 0.8rem auto;
+	}
+
+	.finale__divider--bottom {
+		animation: finaleTextReveal 1s ease 3.5s both;
+	}
+
+	.finale__message {
+		font-size: 0.92rem;
+		line-height: 2;
+		color: var(--text-soft);
+		max-width: 320px;
+		letter-spacing: 0.02em;
+		min-height: 2em;
+	}
+
+	/* ── Signature ── */
+	.finale__signature {
+		margin-top: 0.5rem;
+		text-align: center;
+		opacity: 0;
+		animation: finaleTextReveal 1.2s ease 4.5s both;
+	}
+
+	.finale__sig-text {
+		font-size: 0.65rem;
+		letter-spacing: 0.35em;
+		color: var(--text-muted);
+		margin-bottom: 0.3rem;
+	}
+
+	.finale__sig-name {
+		font-family: var(--serif);
+		font-size: 1.6rem;
+		color: var(--text-bright);
+		letter-spacing: 0.08em;
+		text-shadow: 0 0 30px rgba(200, 170, 120, 0.12);
+		animation: finaleNameGlow 3s ease-in-out 5s infinite;
+	}
+
+	/* ── Replay ── */
+	.finale__replay {
+		margin-top: 1rem;
+		background: none;
+		border: 1px solid rgba(200, 180, 140, 0.2);
+		color: var(--text-muted);
+		font-family: var(--serif);
+		font-size: 0.8rem;
+		letter-spacing: 0.2em;
+		padding: 0.7rem 2.2rem;
+		border-radius: 30px;
+		cursor: url('/star-cursor.svg') 16 16, pointer;
+		transition: color 0.3s, border-color 0.3s, box-shadow 0.3s;
+		opacity: 0;
+		animation: finaleTextReveal 1s ease 5.5s both;
+	}
+
+	.finale__replay:hover,
+	.finale__replay:focus-visible {
+		color: var(--text-soft);
+		border-color: rgba(200, 180, 140, 0.4);
+		box-shadow: 0 0 20px rgba(200, 170, 120, 0.08);
+		outline: none;
+	}
+
+	/* ── Keyframes ── */
+	@keyframes finalePhotoReveal {
+		0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+		60% { opacity: 1; transform: scale(1.03) translateY(-3px); }
+		100% { opacity: 1; transform: scale(1) translateY(0); }
+	}
+
+	@keyframes finaleGlowPulse {
+		0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+		50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+	}
+
+	@keyframes finaleTextReveal {
+		from { opacity: 0; transform: translateY(15px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+
+	@keyframes finaleNameGlow {
+		0%, 100% { text-shadow: 0 0 30px rgba(200, 170, 120, 0.12); }
+		50% { text-shadow: 0 0 40px rgba(200, 170, 120, 0.25), 0 0 80px rgba(200, 170, 120, 0.08); }
+	}
+
+	@media (min-width: 640px) {
+		.finale__photo {
+			width: 260px;
+			height: 340px;
+		}
+		.finale__message { font-size: 1rem; }
+		.finale__sig-name { font-size: 2rem; }
+	}
+</style>
+
+<script>
+	import confetti from 'canvas-confetti';
+
+	const finaleScreen = document.getElementById('finale-screen')!;
+	const finaleMessage = document.getElementById('finale-message')!;
+	const replayBtn = document.getElementById('finale-replay')!;
+
+	const fullMessage = 'Y bueno sé que llevo poco tiempo conociéndote pero me alegra mucho haberte conocido y espero que podamos compartir muchos momentos más juntos y siempre que pueda hacer tu vida un poco más feliz lo haré. Te quedo debiendo el regalo pero espero que este detallito te guste. ¡Feliz cumpleaños Vale! 🎉';
+
+	// ── Typewriter effect ──
+	function typeWriter(el: HTMLElement, text: string, speed = 35) {
+		let i = 0;
+		el.textContent = '';
+		return new Promise<void>((resolve) => {
+			function type() {
+				if (i < text.length) {
+					el.textContent += text.charAt(i);
+					i++;
+					setTimeout(type, speed);
+				} else {
+					resolve();
+				}
+			}
+			type();
+		});
+	}
+
+	// ── Fireworks confetti ──
+	function goldenFireworks() {
+		const gold = ['#c8a84a', '#e8d08a', '#f0dca0', '#d4b460', '#f5e6b8', '#b89830'];
+		const pink = ['#d4a0b0', '#e8b8c8', '#c890a0'];
+		const colors = [...gold, ...pink];
+		const defaults = { disableForReducedMotion: true, colors, zIndex: 300 };
+
+		// Initial burst
+		confetti({ ...defaults, particleCount: 100, spread: 80, origin: { y: 0.5, x: 0.5 }, gravity: 0.6, ticks: 300, scalar: 1.2 });
+
+		// Side bursts
+		setTimeout(() => {
+			confetti({ ...defaults, particleCount: 60, spread: 70, origin: { y: 0.6, x: 0.2 }, gravity: 0.5, ticks: 250 });
+			confetti({ ...defaults, particleCount: 60, spread: 70, origin: { y: 0.6, x: 0.8 }, gravity: 0.5, ticks: 250 });
+		}, 600);
+
+		// Rain from top
+		setTimeout(() => {
+			confetti({ ...defaults, particleCount: 40, spread: 160, origin: { y: 0, x: 0.5 }, gravity: 0.3, ticks: 400, startVelocity: 15, scalar: 0.8 });
+		}, 1200);
+
+		// Final scattered bursts
+		setTimeout(() => {
+			confetti({ ...defaults, particleCount: 35, spread: 100, origin: { y: 0.4, x: 0.3 }, gravity: 0.4, ticks: 280 });
+			confetti({ ...defaults, particleCount: 35, spread: 100, origin: { y: 0.4, x: 0.7 }, gravity: 0.4, ticks: 280 });
+		}, 2000);
+
+		// Continuous gentle rain
+		let count = 0;
+		const interval = setInterval(() => {
+			confetti({ ...defaults, particleCount: 8, spread: 120, origin: { y: -0.05, x: Math.random() }, gravity: 0.25, ticks: 350, startVelocity: 8, scalar: 0.7 });
+			count++;
+			if (count > 12) clearInterval(interval);
+		}, 800);
+	}
+
+	// ── Notify StarField to go golden ──
+	function shiftAtmosphere() {
+		document.dispatchEvent(new CustomEvent('finale:start'));
+	}
+
+	// ── Activate finale ──
+	document.addEventListener('messages:done', () => {
+		// Hide court & message layer immediately
+		const court = document.querySelector('.court') as HTMLElement;
+		const msgLayer = document.getElementById('msg-layer')!;
+		const mainContent = document.getElementById('main-content')!;
+
+		if (court) court.style.transition = 'opacity 1s ease';
+		if (court) court.style.opacity = '0';
+		msgLayer.style.transition = 'opacity 1s ease';
+		msgLayer.style.opacity = '0';
+		mainContent.style.transition = 'opacity 1s ease';
+		mainContent.style.opacity = '0';
+
+		setTimeout(() => {
+			// Show finale
+			finaleScreen.classList.add('finale--active');
+			shiftAtmosphere();
+
+			// Fireworks after photo reveals
+			setTimeout(() => goldenFireworks(), 1200);
+
+			// Start typewriter after text container appears
+			setTimeout(() => {
+				typeWriter(finaleMessage, fullMessage, 38);
+			}, 2000);
+		}, 1100);
+	});
+
+	// ── Replay ──
+	replayBtn.addEventListener('click', () => {
+		window.location.reload();
+	});
+</script>
